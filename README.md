@@ -1,15 +1,10 @@
-# 🎬 Movie Recommender System (Content-Based)
+# 🎬 Movie Recommender System
 
-> 🚀 Live App: https://movie-recommender-system-iqko7nhkvwvuoeglp4pwid.streamlit.app/
-
----
+Explore a movie recommender that returns the **top 5 similar titles** with live poster previews.
 
 ## 🌐 Live Demo
 [![Streamlit App](https://img.shields.io/badge/Streamlit-Live%20Demo-FF4B4B?logo=streamlit&logoColor=white)](https://movie-recommender-system-iqko7nhkvwvuoeglp4pwid.streamlit.app/)
 
-Explore a content-based movie recommender that returns the **top 5 similar titles** with live poster previews.
-
-**Open app:** [movie-recommender-system-iqko7nhkvwvuoeglp4pwid.streamlit.app](https://movie-recommender-system-iqko7nhkvwvuoeglp4pwid.streamlit.app/)
 
 ## 📌 About
 This project implements a **Content-Based Filtering** recommender for movies using metadata from TMDB datasets.  
@@ -45,11 +40,11 @@ The app also integrates the **TMDB API** to fetch poster images for recommended 
 ## 📸 Screenshots
 | Landing Page | Movie Selection |
 |---|---|
-| ![Landing Page](Screenshots/screenshot_landing.png.png) | ![Movie Selection](Screenshots/screenshot_selection.png.png) |
+| ![Landing Page](Screenshots/screenshot_landing.png) | ![Movie Selection](Screenshots/screenshot_selection.png) |
 
 | Recommendation Results | Recommendation Results (Alt Example) |
 |---|---|
-| ![Recommendation Results](Screenshots/screenshot_results.png.png) | ![Recommendation Results Alt](Screenshots/screenshot_results(2).png.png) |
+| ![Recommendation Results](Screenshots/screenshot_results.png) | ![Recommendation Results Alt](Screenshots/screenshot_results(2).png) |
 
 ## ⚙️ How It Works
 
