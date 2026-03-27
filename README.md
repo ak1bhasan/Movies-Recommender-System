@@ -2,17 +2,17 @@
 
 Explore a movie recommender that returns the **top 5 similar titles** with live poster previews.
 
-## 🌐 Live Demo
+## Live Demo
 [![Streamlit App](https://img.shields.io/badge/Streamlit-Live%20Demo-FF4B4B?logo=streamlit&logoColor=white)](https://movie-recommender-system-iqko7nhkvwvuoeglp4pwid.streamlit.app/)
 
 
-## 📌 About
+## About
 This project implements a **Content-Based Filtering** recommender for movies using metadata from TMDB datasets.  
 It builds a text representation (Bag of Words) from curated movie tags, transforms them with **`CountVectorizer`**, computes pairwise **Cosine Similarity**, and serves recommendations through a **Streamlit** UI.
 
 The app also integrates the **TMDB API** to fetch poster images for recommended movies at runtime.
 
-## 🚀 Features
+## Features
 - Recommends **top 5** similar movies for a selected title.
 - Uses a precomputed similarity matrix for fast retrieval.
 - Fetches movie posters dynamically from TMDB movie endpoint.
@@ -20,7 +20,7 @@ The app also integrates the **TMDB API** to fetch poster images for recommended 
 - Interactive Streamlit interface with select box + 5-column recommendation layout.
 - Uses Streamlit data caching to avoid repeated model loading.
 
-## 🛠️ Tech Stack
+## Tech Stack
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-150458?logo=pandas&logoColor=white)
@@ -37,7 +37,7 @@ The app also integrates the **TMDB API** to fetch poster images for recommended 
 - Requests
 - NLTK
 
-## 📸 Screenshots
+## Screenshots
 | Landing Page | Movie Selection |
 |---|---|
 | ![Landing Page](Screenshots/screenshot_landing.png) | ![Movie Selection](Screenshots/screenshot_selection.png) |
@@ -46,7 +46,7 @@ The app also integrates the **TMDB API** to fetch poster images for recommended 
 |---|---|
 | ![Recommendation Results](Screenshots/screenshot_results.png) | ![Recommendation Results Alt](Screenshots/screenshot_results(2).png) |
 
-## ⚙️ How It Works
+## How It Works
 
 ### 1. Data Preprocessing
 - Loads two datasets in the notebook:
@@ -95,7 +95,7 @@ The app also integrates the **TMDB API** to fetch poster images for recommended 
   - Returns **5** movie titles.
 - For each result, calls TMDB API by `movie_id` to fetch poster URL.
 
-## 📂 Project Structure
+## Project Structure
 ```text
 Movie Recommender System/
 ├── app.py
@@ -118,7 +118,7 @@ Movie Recommender System/
     └── screenshot_results(2).png.png
 ```
 
-## ⚡ Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 - Python 3.9+
@@ -151,7 +151,7 @@ Run the app:
 streamlit run app.py
 ```
 
-## 🔑 Configuration
+## Configuration
 ### TMDB API Key
 The current `app.py` contains a hardcoded TMDB API key in `fetch_poster(...)`.
 
@@ -172,19 +172,19 @@ TMDB_API_KEY="YOUR_TMDB_API_KEY"
 $env:TMDB_API_KEY="YOUR_TMDB_API_KEY"
 ```
 
-## 📦 Model Artifacts
+## Model Artifacts
 - `movies.pkl`  
   Pickled DataFrame used at inference time (contains `movie_id`, `title`, `tags`).
 - `similarity.pkl`  
   Precomputed cosine similarity matrix used to rank nearest movies quickly.
 
-## 🧪 Usage
+## Usage
 1. Launch the Streamlit app.
 2. Select a movie from the dropdown.
 3. Click **Recommend**.
 4. View the top 5 similar movies with posters.
 
-## 🚀 Future Improvements
+## Future Improvements
 - Move TMDB key handling to secure secrets/env-based config in code.
 - Add fuzzy title search and typo-tolerant matching.
 - Add filters (genre/year/language) on top of similarity ranking.
@@ -192,6 +192,6 @@ $env:TMDB_API_KEY="YOUR_TMDB_API_KEY"
 - Add evaluation metrics notebook section (precision@k / qualitative checks).
 - Add automated tests for data loading and recommendation outputs.
 
-## 📄 License
+## License
 This project is licensed under the **MIT License**.
 
