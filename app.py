@@ -1,14 +1,30 @@
 import streamlit as st
 import pickle
 import requests
+import os
+
+BASE_DIR = r"C:\Users\Acer\Desktop\Movie Recommender System\models"
 
 @st.cache_data
 def load_data():
-    movies = pickle.load(open('movies.pkl', 'rb'))
-    similarity = pickle.load(open('similarity.pkl', 'rb'))
-    return movies, similarity
+    try:
+        movies_path = os.path.join(BASE_DIR, "movies.pkl")
+        similarity_path = os.path.join(BASE_DIR, "similarity.pkl")
+
+        with open(movies_path, "rb") as f:
+            movies = pickle.load(f)
+
+        with open(similarity_path, "rb") as f:
+            similarity = pickle.load(f)
+
+        return movies, similarity
+
+    except Exception as e:
+        st.error(f"❌ Error loading pickle files: {e}")
+        st.stop()
 
 movies, similarity = load_data()
+
 
 def fetch_poster(movie_id):
     try:
