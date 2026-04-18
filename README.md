@@ -1,24 +1,24 @@
-# 🎬 Movie Recommender System
+# Movie Recommender System
 
-Explore a movie recommender that returns the **top 5 similar titles** with live poster previews.
+A content-based movie recommendation app that returns the top 5 similar titles with posters, similarity match percentages, and movie overviews.
 
 ## Live Demo
 [![Streamlit App](https://img.shields.io/badge/Streamlit-Live%20Demo-FF4B4B?logo=streamlit&logoColor=white)](https://movie-recommender-system-iqko7nhkvwvuoeglp4pwid.streamlit.app/)
 
+## About the Project
+This project implements a content-based filtering recommender using TMDB-style movie metadata. It creates a unified text representation from curated tags, lowercases and stems tokens with NLTK (Porter stemmer), vectorizes text with `CountVectorizer` (`max_features=5000`, English stop words), computes pairwise cosine similarity, and serves recommendations through a Streamlit interface.
 
-## About
-This project implements a **content-based filtering** recommender for movies using metadata from TMDB-style datasets.  
-It builds a text field from curated tags, **lowercases** and **stems** tokens with **NLTK** (Porter stemmer), vectorizes with **`CountVectorizer`** (English stop words, `max_features=5000`), computes pairwise **cosine similarity**, and serves recommendations through a **Streamlit** UI.
-
-The app loads **`movies.pkl`** and **`similarity.pkl`** from the **`models/`** directory and calls the **TMDB API** at runtime for poster images.
+The app loads `movies.pkl` and `similarity.pkl` from the `models/` directory and calls the TMDB API at runtime for poster images.
 
 ## Features
-- Recommends **top 5** similar movies for a selected title.
-- Uses a precomputed similarity matrix for fast retrieval.
+- Recommends the top 5 most similar movies for a selected title.
+- Displays similarity scores as percentage-based match values.
+- Shows movie descriptions (overview) for each recommended movie.
+- Uses a precomputed similarity matrix for low-latency retrieval.
 - Fetches movie posters dynamically from the TMDB movie endpoint.
-- Handles missing or failed poster responses with placeholder images.
-- Interactive Streamlit UI: centered title, movie **selectbox** (duplicate titles deduplicated), **Recommend** button, five-column results.
-- **`@st.cache_data`** caches loaded pickle artifacts so they are not re-read on every interaction.
+- Falls back to placeholder images when poster requests fail or data is missing.
+- Provides an interactive Streamlit UI with a deduplicated movie selectbox and one-click recommendation flow.
+- Uses `@st.cache_data` to cache loaded pickle artifacts between interactions.
 
 ## Tech Stack
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
@@ -29,7 +29,7 @@ The app loads **`movies.pkl`** and **`similarity.pkl`** from the **`models/`** d
 ![Requests](https://img.shields.io/badge/Requests-2C3E50?logo=python&logoColor=white)
 ![NLTK](https://img.shields.io/badge/NLTK-154F6B?logo=python&logoColor=white)
 
-Python · Streamlit · Pandas · NumPy · scikit-learn · Requests · NLTK (see `requirements.txt`).
+Python, Streamlit, Pandas, NumPy, scikit-learn, Requests, and NLTK (see `requirements.txt`).
 
 ## Screenshots
 | Landing Page | Movie Selection |
@@ -41,68 +41,56 @@ Python · Streamlit · Pandas · NumPy · scikit-learn · Requests · NLTK (see 
 | ![Recommendation Results](Screenshots/screenshot_results.png) | ![Recommendation Results Alt](Screenshots/screenshot_results(2).png) |
 
 ## How It Works
+Training and preprocessing are performed offline; the Streamlit app loads only serialized artifacts for inference.
 
-Training and preprocessing live in **`notebooks/Movie_Recommender_System.ipynb`**. The Streamlit app only loads the serialized outputs.
+### 1. Data Loading
+- Source files: `tmdb_5000_movies.csv` and `tmdb_5000_credits.csv` (read via `pd.read_csv`).
+- This repository includes equivalent comma-separated files under `data/tmdb_5000_movies.txt` and `data/tmdb_5000_credits.txt`. You can rename/copy them to `.csv` or read them directly.
 
-### 1. Data loading
-- The notebook expects **`tmdb_5000_movies.csv`** and **`tmdb_5000_credits.csv`** (via `pd.read_csv`).
-- This repository also stores the same TMDB extract under **`data/tmdb_5000_movies.txt`** and **`data/tmdb_5000_credits.txt`** (comma-separated content). You can copy or rename them to `.csv` to match the notebook paths, or point `read_csv` at these files.
+### 2. Merge and Clean
+- Merges movies and credits on `title`.
+- Retains: `movie_id`, `title`, `overview`, `genres`, `keywords`, `cast`, `crew`.
+- Drops null rows with `dropna`.
 
-### 2. Merge and clean
-- Merges movies and credits on **`title`**.
-- Keeps: `movie_id`, `title`, `overview`, `genres`, `keywords`, `cast`, `crew`.
-- Drops rows with missing values (`dropna`).
-
-### 3. Feature engineering
+### 3. Feature Engineering
 - Parses JSON-like columns with `ast.literal_eval`.
-- Extracts `name` lists for **`genres`** and **`keywords`**.
-- **`convertCast`**: first **3** cast names.
-- **`fetch_Director`**: crew member with `job == 'Director'`.
-- Tokenizes **`overview`** with `.split()`, removes inner spaces in tokens (e.g. `Science Fiction` → `ScienceFiction`).
-- Builds **`tags`** as: **`overview` + `genres` + `keywords` + `cast`** (director is computed but not added to `tags` in the notebook).
-- Joins tag lists into a single string, **lowercases**, then applies **NLTK Porter stemming** per word.
+- Extracts `name` values for `genres` and `keywords`.
+- `convertCast`: keeps first 3 cast members.
+- `fetch_Director`: extracts crew member where `job == 'Director'`.
+- Tokenizes `overview`, removes inner spaces in multi-word tokens (for example, `Science Fiction` -> `ScienceFiction`).
+- Builds `tags` from `overview + genres + keywords + cast` (director is extracted but not added to `tags` in the notebook).
+- Joins tokens, lowercases text, and applies NLTK Porter stemming.
 
 ### 4. Vectorization
-- `CountVectorizer(max_features=5000, stop_words='english')` on `tags`.
-- `fit_transform(...).toarray()` → notebook-reported shape **`(4806, 5000)`**.
+- Applies `CountVectorizer(max_features=5000, stop_words='english')` on `tags`.
+- `fit_transform(...).toarray()` gives a matrix with notebook-reported shape `(4806, 5000)`.
 
 ### 5. Similarity
-- `cosine_similarity(vectors)` → matrix shape **`(4806, 4806)`**.
-- Saved with **`pickle`**: `movies.pkl` (DataFrame with `movie_id`, `title`, `tags`), `similarity.pkl` (place these under **`models/`** for the current app).
+- Computes `cosine_similarity(vectors)` with shape `(4806, 4806)`.
+- Saves artifacts using pickle:
+  - `movies.pkl`: DataFrame containing `movie_id`, `title`, `tags` (plus any saved columns).
+  - `similarity.pkl`: cosine similarity matrix aligned with movie row order.
 
-### 6. Recommendation flow (`app.py`)
-- Resolves **`models/movies.pkl`** and **`models/similarity.pkl`** relative to the script directory.
-- On **Recommend**: finds the row index for the selected title, sorts similarity scores descending, takes indices **`[1:6]`** (skip self), maps each index to **`movie_id`** and title, fetches posters via **`fetch_poster(movie_id)`**.
+### 6. Recommendation Flow (`app.py`)
+- Resolves `models/movies.pkl` and `models/similarity.pkl` relative to the script directory.
+- On `Recommend`: finds selected movie index, sorts similarity scores in descending order, takes indices `[1:6]` (excluding self), maps to `movie_id` and title, then fetches posters with `fetch_poster(movie_id)`.
+- Displays recommended titles with poster, match percentage, and overview text.
 
 ## Project Structure
 ```text
 Movie Recommender System/
 ├── app.py
-├── MIT_LICENSE.txt
 ├── README.md
 ├── requirements.txt
-├── .gitattributes
+├── MIT_LICENSE.txt
 ├── .gitignore
-├── .devcontainer/
-│   └── devcontainer.json
-├── .idea/
-│   ├── .gitignore
-│   ├── Movies Recommender System.iml
-│   ├── misc.xml
-│   ├── modules.xml
-│   ├── vcs.xml
-│   ├── dictionaries/
-│   │   └── project.xml
-│   └── inspectionProfiles/
-│       └── profiles_settings.xml
+├── .gitattributes
 ├── data/
-│   ├── tmdb_5000_credits.txt
-│   └── tmdb_5000_movies.txt
+│   ├── tmdb_5000_movies.txt
+│   └── tmdb_5000_credits.txt
 ├── models/
 │   ├── movies.pkl
 │   └── similarity.pkl
-├── notebooks/
-│   └── Movie_Recommender_System.ipynb
 └── Screenshots/
     ├── screenshot_landing.png
     ├── screenshot_selection.png
@@ -111,17 +99,15 @@ Movie Recommender System/
 ```
 
 ## Installation & Setup
-
 ### Prerequisites
-- Python 3.9+ (dev container image uses Python 3.11)
+- Python 3.9 or later
 - Git
-- (Recommended) virtual environment
+- Virtual environment (recommended)
 
-### Local run
+### Local Setup
 ```bash
 git clone <YOUR_REPO_URL>
 cd "Movie Recommender System"
-
 python -m venv .venv
 ```
 
@@ -136,18 +122,13 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Ensure **`models/movies.pkl`** and **`models/similarity.pkl`** exist (train with the notebook or use committed artifacts).
-
-### Dev Containers (GitHub Codespaces / VS Code)
-The **`.devcontainer/devcontainer.json`** installs `requirements.txt`, forwards port **8501**, and can run Streamlit after attach. Adjust commands there if you need extra flags for your environment.
+Ensure `models/movies.pkl` and `models/similarity.pkl` are present before running the app.
 
 ## Configuration
-### TMDB API key
-`fetch_poster` in **`app.py`** uses a **hard-coded** TMDB API key in the request URL.
+### TMDB API Key
+`fetch_poster` in `app.py` currently uses a hard-coded TMDB API key.
 
-For anything beyond local demos:
-
-- Prefer **Streamlit secrets** (e.g. `.streamlit/secrets.toml`, gitignored) or **environment variables**, and build the request URL from that value.
+For production or shared deployments, prefer Streamlit secrets or environment variables:
 
 **Streamlit secrets**
 ```toml
@@ -160,27 +141,25 @@ TMDB_API_KEY="YOUR_TMDB_API_KEY"
 $env:TMDB_API_KEY="YOUR_TMDB_API_KEY"
 ```
 
-Wire the key in code in place of the literal string when you implement this.
+## Usage
+1. Start the app with `streamlit run app.py`.
+2. Select a movie from the dropdown.
+3. Click `Recommend`.
+4. Review the top 5 recommendations with poster, similarity percentage, and overview.
 
-## Model artifacts
+## Model Artifacts
 | File | Role |
 |------|------|
-| `models/movies.pkl` | DataFrame with **`movie_id`**, **`title`**, **`tags`** (and any columns saved at training time). |
-| `models/similarity.pkl` | Precomputed **cosine similarity** matrix aligned with movie row order. |
+| `models/movies.pkl` | DataFrame containing `movie_id`, `title`, `tags` (and any additional saved columns). |
+| `models/similarity.pkl` | Precomputed cosine similarity matrix aligned with movie row order. |
 
-## Usage
-1. Start the app: `streamlit run app.py`
-2. Choose a movie in the dropdown.
-3. Click **Recommend**.
-4. Review the top **5** similar titles and posters.
-
-## Future improvements
-- Read the TMDB key from secrets or env in code (no hard-coded keys).
-- Fuzzy / typo-tolerant title search.
-- Filters (genre, year, language) on top of similarity ranking.
-- Hybrid recommendations (content + collaborative).
-- Evaluation notebook (e.g. precision@k, spot checks).
-- Automated tests for data loading and recommendation outputs.
+## Future Improvements
+- Move TMDB key handling to secrets or environment variables in code.
+- Add fuzzy / typo-tolerant movie search.
+- Add filters (genre, year, language) before or after ranking.
+- Explore hybrid recommendation strategies (content + collaborative).
+- Add evaluation workflows (for example, precision@k and qualitative spot checks).
+- Add automated tests for data loading and recommendation output quality.
 
 ## License
-This project is licensed under the **MIT License**.
+This project is licensed under the MIT License.
